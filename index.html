@@ -65,11 +65,17 @@
       box.innerHTML = '';
       const h = document.createElement('h1'); h.textContent = f.title.stringValue;
       const pre = document.createElement('div'); pre.className = 'prompt'; pre.textContent = text;
+      const imgUrl = f.imageUrl && f.imageUrl.stringValue;
+      if (imgUrl && imgUrl.startsWith('https://pipansarkar.github.io/img/')) {
+        const img = document.createElement('img'); img.src = imgUrl; img.alt = f.title.stringValue;
+        img.style.cssText = 'width:100%;border-radius:14px;margin:0 0 12px;display:block';
+        box.append(img);
+      }
       const copy = document.createElement('button'); copy.className = 'btn secondary'; copy.textContent = 'Copy prompt';
       copy.onclick = async () => { await navigator.clipboard.writeText(text); copy.textContent = 'Copied ✓'; };
       const how = document.createElement('p'); how.className = 'muted';
       how.textContent = 'Paste it in Gemini or ChatGPT and attach your photo. Get the app for more prompts, colour options and festival specials.';
-      box.append(h, pre, copy, how);
+      box.prepend(h); box.append(pre, copy, how);
     } catch (e) {
       box.querySelector('h1').textContent = 'Prompt not found';
     }
