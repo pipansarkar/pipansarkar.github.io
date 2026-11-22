@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Prompt</title>
+<meta name="description" content="Trending AI photo prompts for Gemini and ChatGPT.">
+<link rel="icon" href="/icon.png">
+<style>
+  :root { --fg:#1d1b20; --muted:#5f5a66; --bg:#fffbfe; --card:#f6eef3; --accent:#e8457a; }
+  @media (prefers-color-scheme: dark) { :root { --fg:#ece6ee; --muted:#b5adb9; --bg:#151217; --card:#241e27; --accent:#ff7aa8; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  main { max-width: 640px; margin: 0 auto; padding: 24px 16px 48px; }
+  header { display:flex; align-items:center; gap:12px; margin-bottom:20px; }
+  header img { width:48px; height:48px; border-radius:12px; }
+  header b { font-size:1.25rem; }
+  h1 { font-size:1.6rem; line-height:1.25; margin:0 0 12px; }
+  .prompt { background:var(--card); border-radius:14px; padding:16px; white-space:pre-wrap; }
+  .btn { display:block; width:100%; text-align:center; padding:14px; border-radius:14px; border:0; font-size:1rem;
+         font-weight:600; cursor:pointer; text-decoration:none; margin-top:12px; }
+  .primary { background:var(--accent); color:#fff; }
+  .secondary { background:transparent; color:var(--accent); border:2px solid var(--accent); }
+  .muted { color:var(--muted); font-size:.92rem; }
+  footer { margin-top:32px; font-size:.85rem; color:var(--muted); }
+  footer a { color:var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <header><img src="/icon.png" alt=""><b>AI Prompt</b></header>
+  <div id="content">
+    <h1>Trending AI photo prompts</h1>
+    <p class="muted">Copy-paste prompts for Gemini and ChatGPT: couple, saree, family, festivals and more.</p>
+  </div>
+  <a class="btn primary" id="get" href="https://play.google.com/store/apps/details?id=com.focustech.aiprompt">Get the free app</a>
+  <footer>AI Prompt by focustech · <a href="/ai-prompt-privacy/">Privacy policy</a></footer>
+</main>
+<script>
+  // /p/<id> links open the app when it's installed. Otherwise this page shows
+  // the prompt from the public Firestore collection with a Copy button.
+  (async () => {
+    const m = location.pathname.match(/^\/p\/([a-z0-9-]{1,100})\/?$/);
+    if (!m) return;
+    const id = m[1];
+    const box = document.getElementById('content');
+    try {
+      const r = await fetch('https://firestore.googleapis.com/v1/projects/photo-prompts-6cf9f/databases/(default)/documents/prompts/' + id);
+      if (!r.ok) throw new Error(r.status);
+      const f = (await r.json()).fields;
+      if (f.premium && f.premium.booleanValue) {
+        box.innerHTML = '';
+        const h = document.createElement('h1'); h.textContent = f.title.stringValue; box.append(h);
+        const p = document.createElement('p'); p.className = 'muted';
+        p.textContent = 'This is a Viral prompt. Open it free in the AI Prompt app.'; box.append(p);
+        return;
+      }
+      let text = f.prompt.stringValue;
+      const opts = (f.options && f.options.mapValue && f.options.mapValue.fields) || {};
+      for (const [k, v] of Object.entries(opts)) {
+        const first = v.arrayValue.values[0].stringValue;
+        text = text.split('{' + k + '}').join(first);
+      }
+      document.title = f.title.stringValue + ' – AI Prompt';
+      box.innerHTML = '';
+      const h = document.createElement('h1'); h.textContent = f.title.stringValue;
+      const pre = document.createElement('div'); pre.className = 'prompt'; pre.textContent = text;
+      const copy = document.createElement('button'); copy.className = 'btn secondary'; copy.textContent = 'Copy prompt';
+      copy.onclick = async () => { await navigator.clipboard.writeText(text); copy.textContent = 'Copied ✓'; };
+      const how = document.createElement('p'); how.className = 'muted';
+      how.textContent = 'Paste it in Gemini or ChatGPT and attach your photo. Get the app for more prompts, colour options and festival specials.';
+      box.append(h, pre, copy, how);
+    } catch (e) {
+      box.querySelector('h1').textContent = 'Prompt not found';
+    }
+  })();
+</script>
+</body>
+</html>

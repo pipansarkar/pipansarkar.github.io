@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.focustech.aiprompt",
+      "sha256_cert_fingerprints": [
+        "BB:CB:8D:53:D9:3B:2A:C7:7D:0F:F9:5E:8E:BD:3F:63:EA:26:8A:BD:A3:3B:8A:83:FC:B2:C2:80:37:84:A3:9A"
+      ]
+    }
+  }
+]
